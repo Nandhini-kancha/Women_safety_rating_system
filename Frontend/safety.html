@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Safety Score</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<script>
+if (!localStorage.getItem("user")) {
+  window.location.href = "login.html";
+}
+</script>
+
+<nav class="navbar">
+  <h2>🌸 SafeHer</h2>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="sos.html">SOS</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="safety-card">
+    <h2>📍 Detect Location</h2>
+    <input type="text" id="city" placeholder="Enter city">
+    <button onclick="detectLocation()">Use My Location</button>
+    <p id="location"></p>
+    <button onclick="calculateSafety()">Check Safety Score</button>
+    <h3>Safety Score</h3>
+    <div class="score-bar">
+      <div id="progress" class="progress"></div>
+    </div>
+    <p id="score"></p>
+  </div>
+</section>
+
+<script>
+let currentCity = "";
+
+
+async function detectLocation() {
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    const data = await res.json();
+
+    const city = data.address.city || data.address.town || data.address.village || "";
+
+    // ✅ set in input field
+    document.getElementById("city").value = city;
+
+    // optional display
+    document.getElementById("location").innerText = "Detected: " + city;
+  });
+}
+
+</script>
+<script>
+async function calculateSafety() {
+  const city = document.getElementById("city").value;
+
+  if (!city) {
+    alert("Enter city first");
+    return;
+  }
+
+  const res = await fetch(`http://localhost:5000/api/allfeedbacks`);
+  const data = await res.json();
+
+  // filter same city
+  const cityData = data.filter(f => 
+    f.location.toLowerCase() === city.toLowerCase()
+  );
+
+  if (cityData.length === 0) {
+    alert("No data for this city");
+    return;
+  }
+
+  // calculate average
+  let sum = 0;
+  cityData.forEach(f => sum += f.rating);
+
+  const avg = sum / cityData.length;
+  const score = Math.round((avg / 5) * 100);
+
+  document.getElementById("progress").style.width = score + "%";
+  document.getElementById("score").innerText = "Safety Score: " + score + "%";
+}
+</script>
+</body>
+</html>
