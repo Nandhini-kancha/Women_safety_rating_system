@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Feedback</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+
+  <nav class="navbar">
+  <h2 class="logo">🌸 SafeHer</h2>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="safety.html">Safety</a>
+    <a href="feedback.html">Feedback</a>
+    <a href="feedback-list.html">Reports</a>
+    <a href="sos.html">SOS</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </div>
+</nav>
+<script>
+if (!localStorage.getItem("user")) {
+  window.location.href = "login.html";
+}
+</script>
+
+<div class="hero">
+  <div class="safety-card">
+    <h2>⭐ Submit Feedback</h2>
+
+    <input type="text" id="city" placeholder="City">
+    <input type="number" id="lighting" placeholder="Lighting (1-5)">
+<input type="number" id="police" placeholder="Police Presence (1-5)">
+<input type="number" id="crowd" placeholder="Crowd Level (1-5)">
+    <input type="number" id="rating" placeholder="Rating (1-5)">
+    <textarea id="msg" placeholder="Your experience"></textarea>
+
+    <button onclick="submitFeedback()">Submit</button>
+  </div>
+</div>
+
+<script>
+async function submitFeedback() {
+  const city = document.getElementById("city").value;
+  const rating = document.getElementById("rating").value;
+  const message = document.getElementById("msg").value;
+
+  await fetch("http://localhost:5000/api/feedback", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ location: city, rating, message })
+  });
+
+  alert("Feedback submitted!");
+}
+</script>
+
+</body>
+</html>
